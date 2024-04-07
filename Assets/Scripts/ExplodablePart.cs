@@ -1,42 +1,45 @@
 using DG.Tweening;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
 
-[Serializable]
-public class ExplodablePart : MonoBehaviour, IExplodable
+namespace MK.ExplodingView
 {
-    #region Properties
-
-    #region Public Variables
-
-    public Vector3 OriginalPosition { set; get; }
-    public Vector3 ExplodedPosition { set; get; }
-    public float Duration { set; get; }
-
-    #endregion
-
-    #region Private Variables
-
-    private bool isExploded = false;
-
-    #endregion
-
-    #endregion
-
-    public void Explode()
+    [Serializable]
+    public class ExplodablePart : MonoBehaviour, IExplodable
     {
-        if (!isExploded)
+        #region Public Variables
+
+        public Vector3 OriginalPosition { set; get; }
+        public Vector3 ExplodedPosition { set; get; }
+        public float Duration { set; get; }
+
+        #endregion
+
+        #region Private Variables
+
+        private bool isExploded = false;
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Moves the part to exploded position and back.
+        /// </summary>
+        public void Explode()
         {
-            transform.DOMove(ExplodedPosition, Duration);
-            isExploded = true;
+            if (!isExploded)
+            {
+                transform.DOMove(ExplodedPosition, Duration);
+                isExploded = true;
+            }
+            else
+            {
+                transform.DOMove(OriginalPosition, Duration);
+                isExploded = false;
+            }
         }
-        else
-        {
-            transform.DOMove(OriginalPosition, Duration);
-            isExploded = false;
-        }
+
+        #endregion
     }
 }
