@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MK.ExplodingView.Utils
@@ -7,25 +7,25 @@ namespace MK.ExplodingView.Utils
     public class UtilityFunctions
     {
         /// <summary>
-        /// Calculate the average point of all the <paramref name="meshes"/>' centers.
+        /// Calculate the average point of all the <paramref name="meshFilters"/>' centers.
         /// </summary>
-        /// <param name="meshes"></param>
+        /// <param name="meshFilters"></param>
         /// <returns>The average posiiton of all the meshes' centers.</returns>
-        public static Vector3 GetAverageCenter(List<Vector3> meshes)
+        public static Vector3 GetAverageCenter(Vector3[] meshCenters)
         {
             Vector3 center = Vector3.zero;
 
-            foreach (Vector3 meshCenter in meshes)
+            foreach (Vector3 meshCenter in meshCenters)
                 center += meshCenter;
 
-            if (meshes.Count > 0)
-                center /= meshes.Count;
+            if (meshCenters.Length > 0)
+                center /= meshCenters.Length;
 
             return center;
         }
 
         /// <summary>
-        /// Calculates the point on the line that is closest to the <paramref name="projectedPoint"/>.
+        /// Calculates a point on the line that as a projection of the <paramref name="projectedPoint"/>.
         /// <paramref name="pointOnLine"/> is a point on the line and <paramref name="lineDirection"/> is the direction of the line.
         /// </summary>
         /// <param name="projectedPoint"></param>
@@ -60,7 +60,78 @@ namespace MK.ExplodingView.Utils
                 case Axis.Z:
                     return transform.forward;
                 default:
-                    throw new ArgumentException("Invalid axis");
+                    throw new ArgumentException("Invalid axis. Please provide a single value axis at a time.");
+            }
+        }
+
+        /// <summary>
+        /// Converts the <paramref name="axis"/> to a specific transform direction.
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="axis"></param>
+        /// <returns>Vector3 Direction</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static Vector3 AxisToDirection(Transform transform, ModifierAxis axis)
+        {
+            switch (axis)
+            {
+                case ModifierAxis.PosY:
+                    return transform.up;
+                case ModifierAxis.NegY:
+                    return -transform.up;
+                case ModifierAxis.PosX:
+                    return transform.right;
+                case ModifierAxis.NegX:
+                    return -transform.right;
+                case ModifierAxis.PosZ:
+                    return transform.forward;
+                case ModifierAxis.NegZ:
+                    return -transform.forward;
+                default:
+                    throw new ArgumentException("Invalid axis.");
+            }
+        }
+
+        /// <summary>
+        /// This is used to determine which axis to project the part on.
+        /// The furthest projection point is chosen, which means this part will move opposite to the respective axis.
+        /// E.g. if the part is projected on the X axis, it will move away the X axis of the "center" transform.
+        /// </summary>
+        /// <param name="explodable"></param>
+        /// <returns>The point according to which the part will move.</returns>
+        public static Vector3 GetProjectionPoint(Transform centerTransform, Vector3 position, Axis directionAxis)
+        {
+            Vector3 originalPosition = position;
+            Vector3 centerPosition = centerTransform.position;
+
+            Func<Transform, Axis, Vector3> getTransformDirection = (center, axis) => AxisToDirection(center, axis);
+            Func<Axis, Vector3> getPointOnLine = axis => GetPointOnLine(originalPosition, centerPosition, getTransformDirection(centerTransform, axis));
+            Func<Axis, float> getDistance = axis => Vector3.Distance(originalPosition, getPointOnLine(axis));
+
+            if (directionAxis == Axis.X || directionAxis == Axis.Y || directionAxis == Axis.Z)
+                return getPointOnLine(directionAxis);
+            else
+            {
+                Axis[] axes;
+                switch (directionAxis)
+                {
+                    case Axis.YX:
+                        axes = new[] { Axis.Y, Axis.X };
+                        break;
+                    case Axis.XZ:
+                        axes = new[] { Axis.X, Axis.Z };
+                        break;
+                    case Axis.YZ:
+                        axes = new[] { Axis.Y, Axis.Z };
+                        break;
+                    default:
+                        axes = new[] { Axis.Y, Axis.X, Axis.Z };
+                        break;
+                }
+                // Find the axis that gives the maximum distance
+                Axis axis = axes.Aggregate((a, b) => getDistance(a) >= getDistance(b) ? a : b);
+
+                return getPointOnLine(axis);
             }
         }
 
@@ -94,6 +165,22 @@ namespace MK.ExplodingView.Utils
             }
 
         }
+
+        /// <summary>
+        /// Get the hierarchy depth of the <paramref name="transform"/>.
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <returns>An integer according to depth level, 0 is the first depth leyer.</returns>
+        public static int CalculateHierarchyDepth(Transform transform)
+        {
+            int depth = 0;
+            while (transform.parent != null)
+            {
+                depth++;
+                transform = transform.parent;
+            }
+            return depth;
+        }
     }
 
     [Serializable]
@@ -118,6 +205,29 @@ namespace MK.ExplodingView.Utils
     {
         Y,
         X,
-        Z
+        Z,
+        YX,
+        YZ,
+        XZ,
+        XYZ
+    }
+
+    [Serializable]
+    public enum ModifierAxis
+    {
+        PosX,
+        NegX,
+        PosY,
+        NegY,
+        PosZ,
+        NegZ
+    }
+
+    [Serializable]
+    public enum DistanceFactor
+    {
+        None,
+        DistanceFromCenter,
+        DistanceFromAxis
     }
 }
