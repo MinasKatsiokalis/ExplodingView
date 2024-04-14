@@ -1,8 +1,8 @@
 #if UNITY_EDITOR
-using UnityEditor;
 using UnityEngine;
 using MK.ExplodingView.Core;
 using MK.ExplodingView.Utils;
+using UnityEditor;
 
 namespace MK.ExplodingView.Editor
 {

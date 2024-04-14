@@ -7,6 +7,14 @@
       "dependencies": {},
       "hash": "0c8057c66852e7d720966ef076d4924ebb27e80c"
     },
+    "com.mk.exploding-view-tool": {
+      "version": "file:ExplodingViewTool",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
+      }
+    },
     "com.unity.burst": {
       "version": "1.8.10",
       "depth": 1,

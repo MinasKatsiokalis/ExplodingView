@@ -1,0 +1,20 @@
+{
+  "name": "com.mk.exploding-view-tool",
+  "version": "0.1.3",
+  "displayName": "Exploding View Tool",
+  "description": "Enables exploding view functionality on 3D models.",
+  "unity": "2019.3",
+  "documentationUrl": "https://minaskatsiokalis.github.io/exploding-view/documentation/html/index.html",
+  "dependencies": {
+    "com.cysharp.unitask":"https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
+  },
+  "keywords": [
+    "exploding_view",
+    "tool"
+  ],
+  "author": {
+    "name": "Minas Katsiokalis",
+    "email": "minaskatsiokalis@gmail.com",
+    "url": "https://www.minaskatsiokalis.com"
+  }
+}
