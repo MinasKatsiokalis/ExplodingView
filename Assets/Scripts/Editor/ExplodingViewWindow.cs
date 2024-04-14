@@ -1,12 +1,19 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using MK.ExplodingView.Core;
 
 namespace MK.ExplodingView.Editor
-{
+{   
+    /// <summary>
+    /// Editor window for fast integration of Exploding View package.
+    /// </summary>
     public class ExplodingViewWindow : EditorWindow
-    {
-        public Transform[] transforms;
+    {   
+        /// <summary>
+        /// Array of transforms to be exploded.
+        /// </summary>
+        public Transform[] Transforms;
 
         private ExplodingViewComponent[] explodingViewComponents;
         private Vector2 scrollPosition;
@@ -35,14 +42,14 @@ namespace MK.ExplodingView.Editor
             EditorGUILayout.Space();
 
             SerializedObject serializedObject = new SerializedObject(this);
-            SerializedProperty property = serializedObject.FindProperty("transforms");
+            SerializedProperty property = serializedObject.FindProperty("Transforms");
             EditorGUILayout.PropertyField(property, true);
             serializedObject.ApplyModifiedProperties();
             EditorGUILayout.Space();
 
             if (GUILayout.Button("Add Exploding View Component"))
             {
-                foreach (Transform transform in transforms)
+                foreach (Transform transform in Transforms)
                     if (transform != null && transform.GetComponent<ExplodingViewComponent>() == null)
                         transform.gameObject.AddComponent<ExplodingViewComponent>();
             }
@@ -50,7 +57,7 @@ namespace MK.ExplodingView.Editor
 
             if (GUILayout.Button("Remove All Components"))
             {
-                if (transforms == null || transforms.Length == 0)
+                if (Transforms == null || Transforms.Length == 0)
                 {
                     explodingViewComponents = FindObjectsOfType<ExplodingViewComponent>();
                     foreach (var item in explodingViewComponents)
@@ -58,7 +65,7 @@ namespace MK.ExplodingView.Editor
                 }
                 else
                 {
-                    foreach (Transform transform in transforms)
+                    foreach (Transform transform in Transforms)
                         if (transform != null && transform.GetComponent<ExplodingViewComponent>() != null)
                             DestroyImmediate(transform.gameObject.GetComponent<ExplodingViewComponent>());
                 }
@@ -68,3 +75,4 @@ namespace MK.ExplodingView.Editor
         }
     }
 }
+#endif

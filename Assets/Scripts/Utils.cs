@@ -230,4 +230,5 @@ namespace MK.ExplodingView.Utils
         DistanceFromCenter,
         DistanceFromAxis
     }
+
 }

@@ -18,7 +18,7 @@ namespace MK.ExplodingView.Core
         public bool AddExplodablesAutomatically = true;
         //Exploding properties
         public float ExplosionSpeed = 0.5f;
-        public float ExplosionDistance = 1.5f;
+        public float ExplosionDistance = 1f;
         public DistanceFactor DistanceFactor = DistanceFactor.None;
         public bool AddScaleFactor = false;
         public float ScaleFactorMultiplier = 1;
@@ -42,12 +42,6 @@ namespace MK.ExplodingView.Core
         #endregion
 
         #region Unity Methods
-        private void Awake()
-        {   
-            if(Explodables == null)
-                Explodables = new List<ExplodablePart>();
-        }
-
         private void Start()
         {
             lastPosition = transform.position;
@@ -115,7 +109,7 @@ namespace MK.ExplodingView.Core
         /// Starts the async initialization of the model.
         /// </summary>
         /// <returns></returns>
-        private async UniTaskVoid AsyncInit()
+        private async UniTask AsyncInit()
         {
             //Center
             if (Center == null)
@@ -142,11 +136,16 @@ namespace MK.ExplodingView.Core
                 lastPosition = transform.position;
                 lastRotation = transform.rotation;
             }
-            UniTask[] tasks = new UniTask[Explodables.Count];
-            for (int i = 0; i < Explodables.Count; i++)
-                tasks[i] = Explodables[i].ExplodeAsync();
-            await UniTask.WhenAll(tasks);
 
+            var explodablesGrouped = this.Explodables
+                .GroupBy(item => item.gameObject.GetComponent<ExplodableModifier>()?.Order ?? 0)
+                .OrderBy(group => group.Key);
+
+            foreach (var group in explodablesGrouped)
+            {
+                var tasks = group.Select(explodable => explodable.ExplodeAsync()).ToArray();
+                await UniTask.WhenAll(tasks);
+            }
             IsExploded = !IsExploded;
         }
 
@@ -249,21 +248,25 @@ namespace MK.ExplodingView.Core
         /// </summary>
         private void AddExplodableComponent()
         {
+            Explodables = new List<ExplodablePart>();
+
             MeshRenderer[] meshRenderers = transform.GetComponentsInChildren<MeshRenderer>();
             foreach (var item in meshRenderers)
-                Explodables.Add(item.gameObject.AddComponent<ExplodablePart>());
+                if(item.gameObject.GetComponent<ExplodablePart>() == null)
+                    Explodables.Add(item.gameObject.AddComponent<ExplodablePart>());
         }
 
         /// <summary>
         /// Calculates the center of the model.
         /// </summary>
         private async UniTask CalculateCenter()
-        {
-            Center = new GameObject("Center").transform;
-            Center.SetParent(this.transform);
-
-            Vector3[] meshCenters = transform.GetComponentsInChildren<MeshFilter>().Select(item => item.mesh.bounds.center).ToArray();
-
+        {   
+            if(Center == null)
+            {
+                Center = new GameObject("Center").transform;
+                Center.SetParent(this.transform);
+            }
+            Vector3[] meshCenters = transform.GetComponentsInChildren<MeshFilter>().Select(item => item.sharedMesh.bounds.center).ToArray();
             Center.position = await UniTask.RunOnThreadPool(() => UtilityFunctions.GetAverageCenter(meshCenters));
             Center.rotation = this.transform.rotation;
         }
@@ -279,13 +282,18 @@ namespace MK.ExplodingView.Core
         {
             Func<IExplodable, Vector3> getProjectionPoint = explodable => UtilityFunctions.GetProjectionPoint(Center, explodable.OriginalPosition, DirectionAxis);
             Func<Vector3, Vector3, float> getDistance = (point1, point2) => Vector3.Distance(point1, point2);
+            Func<Transform, ModifierAxis, Vector3> getDirection = (transform, axis) => UtilityFunctions.AxisToDirection(transform, axis);
 
             Vector3 originalPosition = explodable.OriginalPosition;
             Vector3 projectionPoint = getProjectionPoint(explodable);
             Vector3 explosionDirection;
 
             if (explodable.TryGetComponent<ExplodableModifier>(out var modifier))
-                explosionDirection = UtilityFunctions.AxisToDirection(explodable.transform, modifier.axis);
+            {
+                explosionDirection = getDirection(explodable.transform, modifier.Axis);
+                if(modifier.UseSelfDistance)
+                    return originalPosition + (explosionDirection * modifier.Distance);
+            }
             else
                 explosionDirection = (originalPosition - projectionPoint).normalized;
 
@@ -293,6 +301,7 @@ namespace MK.ExplodingView.Core
                 getDistance(originalPosition, Center.position) : getDistance(originalPosition, projectionPoint);
             float additionalFactors = (scaleFactor != null ? scaleFactor.Value * this.transform.localScale.magnitude : 0) + (hierarchyFactor ?? 0);
             return originalPosition + (explosionDirection * ExplosionDistance) * (distanceFactor + additionalFactors);
+
         }
 
         /// <summary>
