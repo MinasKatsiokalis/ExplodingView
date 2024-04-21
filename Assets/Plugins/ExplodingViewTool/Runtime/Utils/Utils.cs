@@ -11,17 +11,17 @@ namespace MK.ExplodingView.Utils
         /// </summary>
         /// <param name="meshFilters"></param>
         /// <returns>The average posiiton of all the meshes' centers.</returns>
-        public static Vector3 GetAverageCenter(Vector3[] meshCenters)
+        public static Vector3 GetAverageCenter(Vector3[] centers)
         {
-            Vector3 center = Vector3.zero;
+            Vector3 finalCenter = Vector3.zero;
 
-            foreach (Vector3 meshCenter in meshCenters)
-                center += meshCenter;
+            foreach (Vector3 center in centers)
+                finalCenter += center;
 
-            if (meshCenters.Length > 0)
-                center /= meshCenters.Length;
+            if (centers.Length > 0)
+                finalCenter /= centers.Length;
 
-            return center;
+            return finalCenter;
         }
 
         /// <summary>
@@ -97,7 +97,9 @@ namespace MK.ExplodingView.Utils
         /// The furthest projection point is chosen, which means this part will move opposite to the respective axis.
         /// E.g. if the part is projected on the X axis, it will move away the X axis of the "center" transform.
         /// </summary>
-        /// <param name="explodable"></param>
+        /// <param name="centerTransform"></param>
+        /// <param name="position"></param>
+        /// <param name="directionAxis"></param>
         /// <returns>The point according to which the part will move.</returns>
         public static Vector3 GetProjectionPoint(Transform centerTransform, Vector3 position, Axis directionAxis)
         {
@@ -167,6 +169,41 @@ namespace MK.ExplodingView.Utils
         }
 
         /// <summary>
+        /// Returns the primary axis of the <paramref name="direction"/> on local space of <paramref name="transform"/>.
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="direction"></param>
+        /// <returns>Vector3 Normalised Direction</returns>
+        public static Vector3 GetPrimaryTransformDirectionAxis(Transform transform, Vector3 direction)
+        {
+            // Create an array of the six direction vectors
+            Vector3[] directions = new Vector3[]
+            {
+                transform.right,
+                -transform.right,
+                transform.up,
+                -transform.up,
+                transform.forward,
+                -transform.forward
+            };
+
+            float minAngle = float.MaxValue;
+            Vector3 closestDirection = directions[0];
+
+            foreach (Vector3 dir in directions)
+            {
+                float angle = Vector3.Angle(direction, dir);
+
+                if (angle < minAngle)
+                {
+                    minAngle = angle;
+                    closestDirection = dir;
+                }
+            }
+            return closestDirection;
+        }
+
+        /// <summary>
         /// Get the hierarchy depth of the <paramref name="transform"/>.
         /// </summary>
         /// <param name="transform"></param>
@@ -183,6 +220,9 @@ namespace MK.ExplodingView.Utils
         }
     }
 
+    /// <summary>
+    /// This struct is used to store the original and exploded positions of the part.
+    /// </summary>
     [Serializable]
     public struct ExplodablePositions
     {
@@ -199,36 +239,4 @@ namespace MK.ExplodingView.Utils
         }
         #endregion
     }
-
-    [Serializable]
-    public enum Axis
-    {
-        Y,
-        X,
-        Z,
-        YX,
-        YZ,
-        XZ,
-        XYZ
-    }
-
-    [Serializable]
-    public enum ModifierAxis
-    {
-        PosX,
-        NegX,
-        PosY,
-        NegY,
-        PosZ,
-        NegZ
-    }
-
-    [Serializable]
-    public enum DistanceFactor
-    {
-        None,
-        DistanceFromCenter,
-        DistanceFromAxis
-    }
-
 }

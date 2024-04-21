@@ -3,7 +3,7 @@ using UnityEngine;
 using MK.ExplodingView.Core;
 using MK.ExplodingView.Utils;
 using UnityEditor;
-
+/*
 namespace MK.ExplodingView.Editor
 {
     [CustomEditor(typeof(ExplodingViewComponent))]
@@ -56,4 +56,5 @@ namespace MK.ExplodingView.Editor
         }
     }
 }
+*/
 #endif

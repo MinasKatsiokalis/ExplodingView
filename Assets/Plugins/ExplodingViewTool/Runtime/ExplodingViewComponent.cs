@@ -19,11 +19,13 @@ namespace MK.ExplodingView.Core
         //Exploding properties
         public float ExplosionSpeed = 0.5f;
         public float ExplosionDistance = 1f;
-        public DistanceFactor DistanceFactor = DistanceFactor.None;
+        public DistanceFactor DistanceFactor = DistanceFactor.DistanceFromCenter;
         public bool AddScaleFactor = false;
         public float ScaleFactorMultiplier = 1;
         public bool AddHierarchyFactor = false;
         public float HierarchyFactorMultiplier = 1;
+        public bool AddSiblingFactor = false;
+        public float SiblingFactorMultiplier = 1;
         //True if the model is in exploded view.
         public bool IsExploded {private set; get;} = false;
         //Debug
@@ -34,6 +36,8 @@ namespace MK.ExplodingView.Core
         private Quaternion lastRotation;
         //Dictionary to store the original and exploded positions of the explodable parts.
         private Dictionary<ExplodablePart, ExplodablePositions> explodablePositionsPoints = new Dictionary<ExplodablePart, ExplodablePositions>();
+        //Explodable parts grouped by the order of the ExplodableModifier component.
+        private IOrderedEnumerable<IGrouping<uint, ExplodablePart>> explodablesGrouped = null;
         //Pool of the points to avoid constant realocation.
         private Queue<Transform> pointsPool = new Queue<Transform>();
         //Exploding task running flag.
@@ -111,12 +115,12 @@ namespace MK.ExplodingView.Core
         /// <returns></returns>
         private async UniTask AsyncInit()
         {
+            if (AddExplodablesAutomatically)
+                AddExplodableComponent();
+
             //Center
             if (Center == null)
                 await CalculateCenter();
-
-            if (AddExplodablesAutomatically)
-                AddExplodableComponent();
 
             if(Explodables.Count > 0)
                 InitializeExplodables();
@@ -136,15 +140,21 @@ namespace MK.ExplodingView.Core
                 lastPosition = transform.position;
                 lastRotation = transform.rotation;
             }
-
-            var explodablesGrouped = this.Explodables
-                .GroupBy(item => item.gameObject.GetComponent<ExplodableModifier>()?.Order ?? 0)
-                .OrderBy(group => group.Key);
-
-            foreach (var group in explodablesGrouped)
+            if (!IsExploded)
             {
-                var tasks = group.Select(explodable => explodable.ExplodeAsync()).ToArray();
-                await UniTask.WhenAll(tasks);
+                foreach (var group in explodablesGrouped.Reverse())
+                {
+                    var tasks = group.Select(explodable => explodable.ExplodeAsync()).ToArray();
+                    await UniTask.WhenAll(tasks);
+                }
+            }
+            else
+            {
+                foreach (var group in explodablesGrouped)
+                {
+                    var tasks = group.Select(explodable => explodable.ExplodeAsync()).ToArray();
+                    await UniTask.WhenAll(tasks);
+                }
             }
             IsExploded = !IsExploded;
         }
@@ -169,12 +179,14 @@ namespace MK.ExplodingView.Core
                 explodable.Duration = ExplosionSpeed;
                 explodable.OriginalPosition = explodable.transform.position;
                 //Calculate the exploded position of the part.
-                float? scaleFactor = AddScaleFactor ? getMeshScale(explodable.transform) * ScaleFactorMultiplier : null;
+                float? scaleFactor = AddScaleFactor ? (1f/getMeshScale(explodable.transform)) * ScaleFactorMultiplier : null;
                 float? hierarchyFactor = AddHierarchyFactor ? calculateDepth(explodable.transform) * HierarchyFactorMultiplier : null;
-                explodable.ExplodedPosition = CalculateExplodedPosition(explodable, scaleFactor, hierarchyFactor);
+                float? siblingFactor = AddSiblingFactor ? explodable.transform.GetSiblingIndex() * SiblingFactorMultiplier : null;
+                explodable.ExplodedPosition = CalculateExplodedPosition(explodable, scaleFactor, hierarchyFactor, siblingFactor);
                 //Save both positions as tranform points into a dictionary.
                 explodablePositionsPoints.Add(explodable, SetPartPositionPoints(explodable, pointsParentObject));
             }
+            explodablesGrouped = Explodables.GroupBy(item => item.gameObject.GetComponent<ExplodableModifier>()?.Order ?? 0).OrderBy(group => group.Key);
         }
 
         /// <summary>
@@ -250,24 +262,54 @@ namespace MK.ExplodingView.Core
         {
             Explodables = new List<ExplodablePart>();
 
-            MeshRenderer[] meshRenderers = transform.GetComponentsInChildren<MeshRenderer>();
-            foreach (var item in meshRenderers)
+            MeshRenderer[] transforms = transform.GetComponentsInChildren<MeshRenderer>();
+            foreach (var item in transforms)
+            {   
+                if(item == this.transform)
+                    continue;
+
                 if(item.gameObject.GetComponent<ExplodablePart>() == null)
                     Explodables.Add(item.gameObject.AddComponent<ExplodablePart>());
+            }
+
+            ExplodableModifier[] modifiers = transform.GetComponentsInChildren<ExplodableModifier>();
+            foreach (var modifier in modifiers)
+            {
+                if (modifier.AffectChildren)
+                    foreach (var child in modifier.GetComponentsInChildren<MeshRenderer>())
+                    {
+                        var modifierComponent = child.gameObject.GetComponent<ExplodableModifier>();
+                        if (modifierComponent != null)
+                            continue;
+
+                        modifierComponent = child.gameObject.AddComponent<ExplodableModifier>();
+                        modifierComponent.Order = modifier.Order;
+                        modifierComponent.ModifierProperty = modifier.ModifierProperty;
+                        modifierComponent.Axis = modifier.Axis;
+
+                        var direction = (modifier.transform.position - child.transform.position).normalized;
+                        var distance = Vector3.Distance(modifier.transform.position, child.transform.position);
+                        var wolrdPosition = modifier.transform.TransformPoint(modifier.LocalPosition) + direction * distance;
+
+                        modifierComponent.LocalPosition = child.transform.TransformVector(wolrdPosition);
+                    }
+            }
         }
 
         /// <summary>
         /// Calculates the center of the model.
         /// </summary>
         private async UniTask CalculateCenter()
-        {   
+        {       
+            Debug.Log("Calculating center");
             if(Center == null)
             {
                 Center = new GameObject("Center").transform;
                 Center.SetParent(this.transform);
+                Center.SetSiblingIndex(0);
             }
-            Vector3[] meshCenters = transform.GetComponentsInChildren<MeshFilter>().Select(item => item.sharedMesh.bounds.center).ToArray();
-            Center.position = await UniTask.RunOnThreadPool(() => UtilityFunctions.GetAverageCenter(meshCenters));
+            Vector3[] transformCenters = transform.GetComponentsInChildren<MeshFilter>().Select(item => item.transform.position).ToArray();
+            Center.position = await UniTask.RunOnThreadPool(() => UtilityFunctions.GetAverageCenter(transformCenters));
             Center.rotation = this.transform.rotation;
         }
 
@@ -278,30 +320,36 @@ namespace MK.ExplodingView.Core
         /// <param name="scaleFactor"></param>
         /// <param name="hierarchyFactor"></param>
         /// <returns>Vector3 position</returns>
-        private Vector3 CalculateExplodedPosition(ExplodablePart explodable, float? scaleFactor = null, float? hierarchyFactor = null)
+        private Vector3 CalculateExplodedPosition(ExplodablePart explodable, float? scaleFactor = null, float? hierarchyFactor = null, float? siblingFactor = null)
         {
             Func<IExplodable, Vector3> getProjectionPoint = explodable => UtilityFunctions.GetProjectionPoint(Center, explodable.OriginalPosition, DirectionAxis);
             Func<Vector3, Vector3, float> getDistance = (point1, point2) => Vector3.Distance(point1, point2);
-            Func<Transform, ModifierAxis, Vector3> getDirection = (transform, axis) => UtilityFunctions.AxisToDirection(transform, axis);
+            Func<Transform, ModifierAxis, Vector3> convertAxis2Direction = (transform, axis) => UtilityFunctions.AxisToDirection(transform, axis);
+            Func<Vector3, Vector3, Vector3> getDirection = (point1, point2) => (point1 - point2).normalized;
 
             Vector3 originalPosition = explodable.OriginalPosition;
             Vector3 projectionPoint = getProjectionPoint(explodable);
-            Vector3 explosionDirection;
+            Vector3 explosionDirection = (getDirection(originalPosition, projectionPoint)); 
+
+            float distanceFactor = DistanceFactor == DistanceFactor.None ? 1 : (DistanceFactor == DistanceFactor.DistanceFromCenter) ?
+                getDistance(originalPosition, Center.position) : getDistance(originalPosition, projectionPoint);
+
+            float additionalFactors = (scaleFactor != null ? scaleFactor.Value * this.transform.localScale.magnitude : 0) + (hierarchyFactor ?? 0) + (siblingFactor ?? 0);
 
             if (explodable.TryGetComponent<ExplodableModifier>(out var modifier))
             {
-                explosionDirection = getDirection(explodable.transform, modifier.Axis);
-                if(modifier.UseSelfDistance)
-                    return originalPosition + (explosionDirection * modifier.Distance);
+                if (modifier.ModifierProperty == ModifierProperty.LocalPosition)
+                    return explodable.transform.TransformPoint(modifier.LocalPosition);
+                else if (modifier.ModifierProperty == ModifierProperty.Axis)
+                    explosionDirection = convertAxis2Direction(explodable.transform, modifier.Axis);
             }
             else
-                explosionDirection = (originalPosition - projectionPoint).normalized;
-
-            float distanceFactor = DistanceFactor == DistanceFactor.None ? 1 : (DistanceFactor == DistanceFactor.DistanceFromCenter) ? 
-                getDistance(originalPosition, Center.position) : getDistance(originalPosition, projectionPoint);
-            float additionalFactors = (scaleFactor != null ? scaleFactor.Value * this.transform.localScale.magnitude : 0) + (hierarchyFactor ?? 0);
+            {
+                var tempExplosionPosition = originalPosition + (explosionDirection * ExplosionDistance) * (distanceFactor + additionalFactors);
+                var tempExplosionDirection = getDirection(tempExplosionPosition, projectionPoint);
+                explosionDirection = UtilityFunctions.GetPrimaryTransformDirectionAxis(explodable.transform, tempExplosionDirection);
+            }
             return originalPosition + (explosionDirection * ExplosionDistance) * (distanceFactor + additionalFactors);
-
         }
 
         /// <summary>

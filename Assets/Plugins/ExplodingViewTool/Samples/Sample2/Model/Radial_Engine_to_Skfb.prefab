@@ -3438,7 +3438,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7421405508789656818}
-  - component: {fileID: 6959195681293465480}
   m_Layer: 0
   m_Name: Radial_Engine_to_Skfb
   m_TagString: Untagged
@@ -3468,26 +3467,6 @@ Transform:
   - {fileID: 7873049931066373517}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
---- !u!114 &6959195681293465480
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4929523069328905263}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73d6682ee63b0b84ca907296c30c69b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Center: {fileID: 0}
-  DirectionAxis: 0
-  AddExplodablesAutomatically: 1
-  ExplosionSpeed: 1
-  ExplosionDistance: 1.34
-  Explodables: []
-  pointPrefab: {fileID: 3470581979251596349, guid: 4b6c433f0c1485c4ebb5f0f7753f7dca, type: 3}
-  debug: 1
 --- !u!1 &4929896738798413745
 GameObject:
   m_ObjectHideFlags: 0
