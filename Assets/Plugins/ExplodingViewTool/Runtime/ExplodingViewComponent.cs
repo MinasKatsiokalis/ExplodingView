@@ -179,7 +179,7 @@ namespace MK.ExplodingView.Core
                 explodable.Duration = ExplosionSpeed;
                 explodable.OriginalPosition = explodable.transform.position;
                 //Calculate the exploded position of the part.
-                float? scaleFactor = AddScaleFactor ? (1f/getMeshScale(explodable.transform)) * ScaleFactorMultiplier : null;
+                float? scaleFactor = AddScaleFactor ? (getMeshScale(explodable.transform)) * ScaleFactorMultiplier : null;
                 float? hierarchyFactor = AddHierarchyFactor ? calculateDepth(explodable.transform) * HierarchyFactorMultiplier : null;
                 float? siblingFactor = AddSiblingFactor ? explodable.transform.GetSiblingIndex() * SiblingFactorMultiplier : null;
                 explodable.ExplodedPosition = CalculateExplodedPosition(explodable, scaleFactor, hierarchyFactor, siblingFactor);
