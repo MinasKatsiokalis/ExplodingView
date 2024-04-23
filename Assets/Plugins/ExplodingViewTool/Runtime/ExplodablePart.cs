@@ -1,7 +1,9 @@
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System;
 using UnityEngine;
+#if UNITASK
+using Cysharp.Threading.Tasks;
+#endif
 
 namespace MK.ExplodingView.Core
 {   
@@ -37,7 +39,7 @@ namespace MK.ExplodingView.Core
             else
                 transform.DOMove(OriginalPosition, Duration).onComplete += () => isExploded = false;
         }
-
+#if UNITASK
         /// <summary>
         /// Moves the part to exploded position and back.
         /// Runs asynchronously.
@@ -51,6 +53,7 @@ namespace MK.ExplodingView.Core
 
             await UniTask.Delay(TimeSpan.FromSeconds(Duration));
         }
+#endif
 
         #endregion
     }

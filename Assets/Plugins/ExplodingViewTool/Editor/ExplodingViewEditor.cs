@@ -64,7 +64,7 @@ namespace MK.ExplodingView.Editor
             SerializedProperty drawDirectionAxisProperty = serializedObject.FindProperty("DrawDirectionAxis");
             EditorGUILayout.PropertyField(drawDirectionAxisProperty, new GUIContent("Draw Direction Axis.", ""));
             EditorGUILayout.Space();
-
+#if UNITASK
             if (GUILayout.Button("Exploding View"))
                 explodingViewComponent.ExplodingView();
 
@@ -72,7 +72,7 @@ namespace MK.ExplodingView.Editor
 
             if (GUILayout.Button("Recalculate"))
                 explodingViewComponent.CalculateExplodingParameters();
-
+#endif
             serializedObject.ApplyModifiedProperties();
         }
     }

@@ -18,7 +18,7 @@ namespace MK.ExplodingView.Editor
         private ExplodingViewComponent[] explodingViewComponents;
         private Vector2 scrollPosition;
 
-        [MenuItem("Tools/Exploding View")]
+        [MenuItem("Tools/Exploding View/Add Components")]
         public static void ShowWindow()
         {
             GetWindow<ExplodingViewWindow>("Exploding View");

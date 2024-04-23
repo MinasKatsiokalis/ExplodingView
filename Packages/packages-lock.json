@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "0c8057c66852e7d720966ef076d4924ebb27e80c"
+      "hash": "2e225fb8414e023df2aa3acae2ef225471981316"
     },
     "com.unity.burst": {
       "version": "1.8.10",
@@ -17,7 +17,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.cloud.gltfast": {
-      "version": "6.2.0",
+      "version": "6.4.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {

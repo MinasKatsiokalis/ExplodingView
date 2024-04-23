@@ -1,9 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using System;
 using System.Linq;
 using MK.ExplodingView.Utils;
+#if UNITASK
+using Cysharp.Threading.Tasks;
+#endif
 
 namespace MK.ExplodingView.Core
 {   
@@ -72,6 +74,7 @@ namespace MK.ExplodingView.Core
         private GameObject debug;
         #endregion
 
+#if UNITASK
         #region Unity Methods
         private void Start()
         {
@@ -523,5 +526,7 @@ namespace MK.ExplodingView.Core
         #endregion
 
         #endregion
+
+    #endif
     }
 }
