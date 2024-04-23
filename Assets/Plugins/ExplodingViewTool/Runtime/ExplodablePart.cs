@@ -4,7 +4,10 @@ using System;
 using UnityEngine;
 
 namespace MK.ExplodingView.Core
-{
+{   
+    /// <summary>
+    /// This is added to any part to make it explode.
+    /// </summary>
     [Serializable]
     public class ExplodablePart : MonoBehaviour, IExplodable
     {

@@ -3,6 +3,18 @@ using System;
 namespace MK.ExplodingView.Utils
 {
     /// <summary>
+    /// The direction of the explosion parts.
+    /// </summary>
+    [Serializable]
+    public enum Direction
+    {
+        FromCenter,
+        FromAxis,
+        FromPlane,
+        FromParent
+    }
+
+    /// <summary>
     /// The axis according to which the explosion is going to happen.
     /// </summary>
     [Serializable]
@@ -23,9 +35,21 @@ namespace MK.ExplodingView.Utils
     [Serializable]
     public enum DistanceFactor
     {
-        None,
         DistanceFromCenter,
-        DistanceFromAxis
+        DistanceFromParent,
+        DistanceFromProjectionPoint,
+        StaticDistance
+    }
+
+    /// <summary>
+    /// The reference point for the static distance.
+    /// </summary>
+    [Serializable]
+    public enum StaticDistanceReference
+    {   
+        Self,
+        Parent,
+        Center
     }
 
     /// <summary>
@@ -52,5 +76,15 @@ namespace MK.ExplodingView.Utils
         NegY,
         PosZ,
         NegZ
+    }
+
+    /// <summary>
+    /// Scale factor to be used for the explosion.
+    /// </summary>
+    [Serializable]
+    public enum ScaleFactor
+    {
+        LargerFurther,
+        SmallerFurther,
     }
 }

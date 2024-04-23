@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace MK.ExplodingView.Samples
 {   
@@ -33,6 +32,9 @@ namespace MK.ExplodingView.Samples
 
             if (Input.GetMouseButton(0))
             {
+                if (EventSystem.current.IsPointerOverGameObject())
+                    return;
+
                 float targetX = mouseX + Input.GetAxis("Mouse X") * rotateSpeed;
                 float targetY = mouseY - Input.GetAxis("Mouse Y") * rotateSpeed;
                 mouseY = Mathf.Clamp(targetY, -35, 60);
