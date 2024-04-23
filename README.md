@@ -2,7 +2,7 @@
 A Unity package for exploding view functionality on 3D models.
 
 ## Quick Start
-**Download & install .unitypackage from [releseas](https://github.com/MinasKatsiokalis/ExplodingView/releases)**.
+**Download & install .unitypackage from [releases](https://github.com/MinasKatsiokalis/ExplodingView/releases)**.
 
 This package includes [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676#description) plugin that is used in this package.
 Once downloaded an editor window will pop to install [UniTask](https://github.com/Cysharp/UniTask) package (essential for this tool), 
