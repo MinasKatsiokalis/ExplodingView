@@ -19,7 +19,7 @@ From the parent object you can adjust the properties from the ExplodingViewCompo
 ## UPM Package
 ### Install via git URL
 
-**You can add `https://github.com/MinasKatsiokalis/ExplodingView.git?path=Packages/ExplodingViewTool` to Package Manager.**
+**You can add `https://github.com/MinasKatsiokalis/ExplodingView.git?path=Assets/Plugins/ExplodingViewTool` to Package Manager.**
 
 ![image](https://user-images.githubusercontent.com/46207/79450714-3aadd100-8020-11ea-8aae-b8d87fc4d7be.png)
 
