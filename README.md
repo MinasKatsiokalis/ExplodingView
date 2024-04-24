@@ -32,7 +32,7 @@ Click "Add Exploding View Component" to add the ExplodngViewComponent.cs onto th
 
 ![image](https://github.com/MinasKatsiokalis/ExplodingView/assets/9119948/60f58452-d60e-47d8-a6ac-1aa61c35a0ae)
 
-- From the parent object you can adjust the properties from the ExplodingViewComponent inspector editor.<br>
+- From the parent object you can adjust the properties from the ExplodingViewComponent inspector editor. Each property has a tooltip that indigates how is used, read them carefully.<br>
 - You can leave the default option to automatically add the exploding parts of the model (including any game object that is children of the transform) or add manualy only the transforms you want to be exploded by deselecting the **"Add Explodables Automatically"**.<br>
 ***Exploding view is applied only to sub-objects that have a mesh.***
   
