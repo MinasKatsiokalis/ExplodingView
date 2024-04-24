@@ -16,7 +16,7 @@ Clone this repo using:
 ```
 $ git clone https://github.com/MinasKatsiokalis/ExplodingView.git
 ```
-If you want to test the sample scenes go to *Assets/Plugins/ExplodingViewTool/Samples*
+If you want to test the sample scenes go to *ExplodingViewTool/Samples*
 
 ### 3. Install via [Package Manager](https://github.com/MinasKatsiokalis/ExplodingView?tab=readme-ov-file#install-via-git-url) 
 
@@ -26,7 +26,7 @@ If you want to test the sample scenes go to *Assets/Plugins/ExplodingViewTool/Sa
 Click "Add Exploding View Component" to add the ExplodngViewComponent.cs onto the object.<br>
 From the parent object you can adjust the properties from the ExplodingViewComponent inspector editor.<br>
 
-- In **Assets/Plugins/ExplodingViewTool/Runtime** you can find all the core components for further implementation into your own scripts.
+- In **ExplodingViewTool/Runtime** you can find all the core components for further implementation into your own scripts.
 
 
 ***Exploding view is applied only to sub-objects that have a mesh.***
