@@ -136,6 +136,16 @@ namespace MK.ExplodingView.Core
             if (DrawDirectionAxis)
                 DrawDebugLine();
         }
+
+        /// <summary>
+        /// Initializes the model for exploding view.
+        /// </summary>
+        public void Init()
+        {
+            lastPosition = transform.position;
+            lastRotation = transform.rotation;
+            AsyncInit().Forget();
+        }
         #endregion
 
         #region Private Methods
