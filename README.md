@@ -18,7 +18,7 @@ $ git clone https://github.com/MinasKatsiokalis/ExplodingView.git
 ```
 If you want to test the sample scenes go to *Assets/Plugins/ExplodingViewTool/Samples*
 
-### 3. Instal via [Package Manager](https://github.com/MinasKatsiokalis/ExplodingView/edit/main/README.md#install-via-git-url) 
+### 3. Instal via [Package Manager](https://github.com/MinasKatsiokalis/ExplodingView?tab=readme-ov-file#install-via-git-url) 
 
 ## Usage
 
