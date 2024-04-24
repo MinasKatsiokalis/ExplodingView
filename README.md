@@ -36,11 +36,11 @@ Click "Add Exploding View Component" to add the ExplodngViewComponent.cs onto th
 - You can leave the default option to automatically add the exploding parts of the model (including any game object that is children of the transform) or add manualy only the transforms you want to be exploded by deselecting the **"Add Explodables Automatically"**.<br>
 ***Exploding view is applied only to sub-objects that have a mesh.***
   
-<img src="https://github.com/MinasKatsiokalis/ExplodingView/assets/9119948/51a9343e-418e-49e1-a621-6cbb6b3a451e" width="45%"></img> 
+![image](https://github.com/MinasKatsiokalis/ExplodingView/assets/9119948/51a9343e-418e-49e1-a621-6cbb6b3a451e)
 
 - You can adjust the behaviour of any explodable part, by adding the **ExplodableModifier** component to it. This allows the part to ignore the exploding direction of the **ExplodingViewComponent** higher in the hierarchy and behave with its own properties. Through ExplodableModifier can be adjusted the order in which the part/parts will be exploded by changing their order (e.g. order 2 will explode before order 1 etc.).
 
-<img src="https://github.com/MinasKatsiokalis/ExplodingView/assets/9119948/d862e102-236e-4834-bd97-a7999ead4d4f" width="45%"></img> 
+![image](https://github.com/MinasKatsiokalis/ExplodingView/assets/9119948/d862e102-236e-4834-bd97-a7999ead4d4f)
 
 > [!NOTE]
 > **ExplodableModifier** should be added before **ExplodingViewComponent** initialization, which happens in Start method.
